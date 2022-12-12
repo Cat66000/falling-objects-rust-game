@@ -13,10 +13,14 @@ pub mod game {
     pub const DEFAULT_PLAYER_SPEED: f32 = 5.0;
 
     pub const DEFAULT_BALL_RADIUS: f32 = 30.0;
+    pub const DEFAULT_BALL_Y: f32 = 80.0;
+
+    pub const LEFT_MAP_BORDER: f32 = 70.0;
+    pub const RIGHT_MAP_BORDER: f32 = 800.0 - 70.0;
 
     use macroquad::prelude::*;
 
-    #[derive(Clone, Copy)]
+    // #[derive(Clone, Copy)]
     pub struct Size {
         pub width: f32,
         pub height: f32,
@@ -26,6 +30,7 @@ pub mod game {
         pub move_left: KeyCode,
         pub move_right: KeyCode,
     }
+
     pub struct Player {
         pub position: Vec2,
         pub number: i8,
@@ -106,6 +111,12 @@ pub mod game {
                 if is_key_down(self.controls.move_right) {
                     new_position.x += DEFAULT_PLAYER_SPEED;
                 }
+
+                if new_position.x < LEFT_MAP_BORDER {
+                    new_position.x = LEFT_MAP_BORDER;
+                } else if new_position.x + self.size.width > RIGHT_MAP_BORDER {
+                    new_position.x = RIGHT_MAP_BORDER - self.size.width;
+                }
             }
             self.set_position(new_position);
             self.render();
@@ -168,7 +179,7 @@ pub mod game {
 
         pub fn on_frame(&mut self) {
             let mut new_position = self.position.clone();
-            
+
             if unsafe { PAUSED } == false {
                 new_position.y += 3.0 * (unsafe { DIFFICULTY as f32 } / 2.0);
             }

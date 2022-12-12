@@ -1,9 +1,9 @@
 mod game;
 
 use game::game::*;
-use macroquad::prelude::*;
+use macroquad::{prelude::*, rand::gen_range, time};
 
-fn show_score(players: &[&mut Player; 2]) {
+fn show_score(players: &Vec<Player>) {
     let score_font_size: f32 = 25.0;
 
     let player_1 = &players[0];
@@ -46,44 +46,43 @@ fn show_score(players: &[&mut Player; 2]) {
     );
 }
 
-#[macroquad::main("Falling Objects")]
-async fn main() {
-    let mut player_1 = Player::new(
-        Vec2 {
-            x: 150.0,
-            y: DEFAULT_PLAYER_Y,
-        },
-        Controls {
-            move_left: KeyCode::Left,
-            move_right: KeyCode::Right,
-        },
-        1,
-    );
+fn gen_ball_x() -> f32 {
+    gen_range(
+        LEFT_MAP_BORDER + DEFAULT_BALL_RADIUS + 20.0,
+        RIGHT_MAP_BORDER - DEFAULT_BALL_RADIUS - 20.0,
+    )
+}
 
-    //screen_width() - 150.0 - DEFAULT_PLAYER_WIDTH,
-    // DEFAULT_PLAYER_Y + 120.0,
-    let mut player_2 = Player::new(
-        Vec2 {
-            x: screen_width() - 150.0 - DEFAULT_PLAYER_SIZE.width,
-            y: DEFAULT_PLAYER_Y + 120.0,
-        },
-        Controls {
-            move_left: KeyCode::Q,
-            move_right: KeyCode::D,
-        },
-        2,
-    );
+fn gen_ball_type() -> BallTypes {
+    let random_number = gen_range(0, 100);
 
-    let mut players: [&mut Player; 2] = [&mut player_1, &mut player_2];
-    let mut balls: Vec<Ball> = vec![];
+    if random_number >= 0 && random_number < 60 {
+        BallTypes::Normal
+    } else if random_number >= 60 && random_number < 85 {
+        BallTypes::Poisonous
+    } else {
+        BallTypes::Regeneration
+    }
+}
 
-    balls.push(Ball::new(
-        Vec2 { x: 80.0, y: 50.0 },
-        BallTypes::Normal,
-        balls.len(),
-    ));
+fn add_ball(balls: &mut Vec<Ball>, ball_position: Vec2, ball_type: BallTypes) {
+    let ball_to_add = Ball::new(ball_position, ball_type, balls.len());
+    balls.push(ball_to_add);
+}
 
+async fn main_loop(players: &mut Vec<Player>, balls: &mut Vec<Ball>) {
     let mut escape_pressed_last_time = false;
+
+    add_ball(
+        balls,
+        Vec2 {
+            x: gen_ball_x(),
+            y: DEFAULT_BALL_Y,
+        },
+        BallTypes::Normal,
+    );
+    let mut last_ball_spawned = time::get_time();
+
     loop {
         if is_key_pressed(KeyCode::Escape) && (escape_pressed_last_time == false) {
             unsafe {
@@ -99,6 +98,18 @@ async fn main() {
 
         // draw_rectangle(35.0, 35.0, 80.0, 80.0, RED);
         // draw_circle(75.0, 75.0, 40.0, BLACK);
+
+        if (time::get_time() - 10.0) > last_ball_spawned {
+            add_ball(
+                balls,
+                Vec2 {
+                    x: gen_ball_x(),
+                    y: DEFAULT_BALL_Y,
+                },
+                gen_ball_type(),
+            );
+            last_ball_spawned = time::get_time();
+        }
 
         let mut balls_to_delete: Vec<usize> = vec![];
 
@@ -137,4 +148,38 @@ async fn main() {
 
         next_frame().await
     }
+}
+
+#[macroquad::main("Falling Objects")]
+async fn main() {
+    let mut player_1 = Player::new(
+        Vec2 {
+            x: 150.0,
+            y: DEFAULT_PLAYER_Y,
+        },
+        Controls {
+            move_left: KeyCode::Left,
+            move_right: KeyCode::Right,
+        },
+        1,
+    );
+
+    //screen_width() - 150.0 - DEFAULT_PLAYER_WIDTH,
+    // DEFAULT_PLAYER_Y + 120.0,
+    let mut player_2 = Player::new(
+        Vec2 {
+            x: screen_width() - 150.0 - DEFAULT_PLAYER_SIZE.width,
+            y: DEFAULT_PLAYER_Y + 120.0,
+        },
+        Controls {
+            move_left: KeyCode::Q,
+            move_right: KeyCode::D,
+        },
+        2,
+    );
+
+    let mut players: Vec<Player> = vec![player_1, player_2];
+    let mut balls: Vec<Ball> = vec![];
+
+    main_loop(&mut players, &mut balls).await;
 }
