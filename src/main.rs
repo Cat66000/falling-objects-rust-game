@@ -58,7 +58,7 @@ fn gen_ball_type() -> BallTypes {
 
     if random_number >= 0 && random_number < 60 {
         BallTypes::Normal
-    } else if random_number >= 60 && random_number < 85 {
+    } else if random_number >= 60 && random_number < 80 {
         BallTypes::Poisonous
     } else {
         BallTypes::Regeneration
@@ -152,7 +152,8 @@ async fn main_loop(players: &mut Vec<Player>, balls: &mut Vec<Ball>) {
 
 #[macroquad::main("Falling Objects")]
 async fn main() {
-    let mut player_1 = Player::new(
+    
+    let player_1 = Player::new(
         Vec2 {
             x: 150.0,
             y: DEFAULT_PLAYER_Y,
@@ -166,7 +167,7 @@ async fn main() {
 
     //screen_width() - 150.0 - DEFAULT_PLAYER_WIDTH,
     // DEFAULT_PLAYER_Y + 120.0,
-    let mut player_2 = Player::new(
+    let player_2 = Player::new(
         Vec2 {
             x: screen_width() - 150.0 - DEFAULT_PLAYER_SIZE.width,
             y: DEFAULT_PLAYER_Y + 120.0,
