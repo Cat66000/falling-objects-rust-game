@@ -31,13 +31,13 @@ pub mod game {
 
     pub const DEFAULT_PLAYER_SIZE: Size = Size {
         width: 90.0,
-        height: 70.0,
+        height: 50.0,
     };
     pub const DEFAULT_PLAYER_Y: f32 = 360.0;
     pub const DEFAULT_PLAYER_HEALTH: i8 = 3;
-    pub const DEFAULT_PLAYER_SPEED: f32 = 7.0;
+    pub const DEFAULT_PLAYER_SPEED: f32 = 8.0;
 
-    pub const DEFAULT_BALL_RADIUS: f32 = 30.0;
+    pub const DEFAULT_BALL_RADIUS: f32 = 15.0;
     pub const DEFAULT_BALL_Y: f32 = 40.0;
 
     pub const LEFT_MAP_BORDER: f32 = 40.0;
@@ -178,8 +178,8 @@ pub mod game {
         pub fn gen_ball_position() -> Vec2 {
             Vec2 {
                 x: gen_range(
-                    LEFT_MAP_BORDER + DEFAULT_BALL_RADIUS + 100.0,
-                    RIGHT_MAP_BORDER - DEFAULT_BALL_RADIUS - 100.0,
+                    LEFT_MAP_BORDER + DEFAULT_BALL_RADIUS + 150.0,
+                    RIGHT_MAP_BORDER - DEFAULT_BALL_RADIUS - 150.0,
                 ),
                 y: DEFAULT_BALL_Y,
             }
@@ -250,7 +250,7 @@ pub mod game {
             let mut new_position = self.position.clone();
 
             if is_paused() == false {
-                new_position.y += 2.0 + (get_difficulty() as f32 / 10.0);
+                new_position.y += 2.0 + (get_difficulty() as f32 / 7.0);
             }
 
             self.set_position(new_position);

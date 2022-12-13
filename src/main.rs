@@ -111,7 +111,7 @@ async fn main_loop(players: &mut Vec<Player>, balls: &mut Vec<Ball>) {
         // draw_circle(75.0, 75.0, 40.0, BLACK);
 
         if ((time::get_time() - 50.0 - pause_time + {
-            let t = get_difficulty() / 100;
+            let t = get_difficulty() / 130;
 
             if t > 40 {
                 40.0
@@ -177,6 +177,13 @@ async fn main_loop(players: &mut Vec<Player>, balls: &mut Vec<Ball>) {
         if is_paused() == true {
             draw_text("Paused", 20.0, 130.0, 55.0, ORANGE);
         };
+        draw_text(
+            format!("FPS: {}", get_fps()).as_str(),
+            20.0,
+            40.0,
+            30.0,
+            RED,
+        );
         next_frame().await
     }
 }
@@ -187,30 +194,6 @@ async fn main() {
 
     let mut players: Vec<Player> = vec![];
     let mut balls: Vec<Ball> = vec![];
-
-    // let player_1 = Player::new(
-    //     Vec2 {
-    //         x: 150.0,
-    //         y: DEFAULT_PLAYER_Y,
-    //     },
-    //     Controls {
-    //         move_left: KeyCode::Left,
-    //         move_right: KeyCode::Right,
-    //     },
-    //     1,
-    // );
-
-    // let player_2 = Player::new(
-    //     Vec2 {
-    //         x: screen_width() - 150.0 - DEFAULT_PLAYER_SIZE.width,
-    //         y: DEFAULT_PLAYER_Y + 120.0,
-    //     },
-    //     Controls {
-    //         move_left: KeyCode::Q,
-    //         move_right: KeyCode::D,
-    //     },
-    //     2,
-    // );
 
     main_loop(&mut players, &mut balls).await;
 }
