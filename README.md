@@ -7,4 +7,4 @@ You need [Cargo](https://doc.rust-lang.org/cargo/getting-started/installation.ht
 
 And then, at the root of the project (assuming you've downloaded the repo) you need to execute `cargo build` in the terminal, or just `cargo run` if you wanna compile & run
 
-#### You can add --release after the commands if you want to compile with optimisations!
+#### You can add `--release` after the commands if you want to compile with optimisations!
