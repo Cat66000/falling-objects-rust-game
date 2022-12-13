@@ -4,6 +4,29 @@ pub mod game {
     pub static mut DIFFICULTY: i32 = 1;
     pub static mut PAUSED: bool = false;
 
+    pub fn get_difficulty() -> i32 {
+        unsafe { DIFFICULTY }
+    }
+    pub fn set_difficulty(new_difficulty: i32) {
+        unsafe {
+            DIFFICULTY = new_difficulty;
+        }
+    }
+    pub fn add_difficulty(difficulty_to_add: i32) {
+        unsafe {
+            DIFFICULTY += difficulty_to_add;
+        }
+    }
+
+    pub fn is_paused() -> bool {
+        unsafe { PAUSED }
+    }
+    pub fn set_pause(new_state: &bool) {
+        unsafe {
+            PAUSED = *new_state;
+        }
+    }
+
     pub const MAX_HEALTH: i8 = 3;
 
     pub const DEFAULT_PLAYER_SIZE: Size = Size {
@@ -15,10 +38,10 @@ pub mod game {
     pub const DEFAULT_PLAYER_SPEED: f32 = 7.0;
 
     pub const DEFAULT_BALL_RADIUS: f32 = 30.0;
-    pub const DEFAULT_BALL_Y: f32 = 80.0;
+    pub const DEFAULT_BALL_Y: f32 = 40.0;
 
-    pub const LEFT_MAP_BORDER: f32 = 70.0;
-    pub const RIGHT_MAP_BORDER: f32 = 800.0 - 70.0;
+    pub const LEFT_MAP_BORDER: f32 = 40.0;
+    pub const RIGHT_MAP_BORDER: f32 = 800.0 - LEFT_MAP_BORDER;
     pub const GROUND_MAP_BORDER: f32 = 600.0;
     // #[derive(Clone, Copy)]
     pub struct Size {
@@ -37,6 +60,7 @@ pub mod game {
         pub size: Size,
         pub health: i8,
         pub score: i32,
+        pub max_score: i32,
         //
         pub controls: Controls,
     }
@@ -52,6 +76,7 @@ pub mod game {
                 size,
                 health,
                 score: 0,
+                max_score: 0,
                 controls,
             }
         }
@@ -87,6 +112,9 @@ pub mod game {
 
         pub fn add_score(&mut self, score_to_add: i32) -> &Self {
             self.score += score_to_add;
+            if self.max_score < self.score {
+                self.max_score = self.score;
+            }
             self
         }
 
@@ -104,7 +132,7 @@ pub mod game {
         pub fn on_frame(&mut self) {
             let mut new_position = self.position.clone();
 
-            if unsafe { PAUSED } == false {
+            if is_paused() == false {
                 if is_key_down(self.controls.move_left) {
                     new_position.x -= DEFAULT_PLAYER_SPEED;
                 }
@@ -150,8 +178,8 @@ pub mod game {
         pub fn gen_ball_position() -> Vec2 {
             Vec2 {
                 x: gen_range(
-                    LEFT_MAP_BORDER + DEFAULT_BALL_RADIUS + 20.0,
-                    RIGHT_MAP_BORDER - DEFAULT_BALL_RADIUS - 20.0,
+                    LEFT_MAP_BORDER + DEFAULT_BALL_RADIUS + 100.0,
+                    RIGHT_MAP_BORDER - DEFAULT_BALL_RADIUS - 100.0,
                 ),
                 y: DEFAULT_BALL_Y,
             }
@@ -221,8 +249,8 @@ pub mod game {
         pub fn on_frame(&mut self) {
             let mut new_position = self.position.clone();
 
-            if unsafe { PAUSED } == false {
-                new_position.y += 2.0 + (unsafe { DIFFICULTY as f32 } / 10.0);
+            if is_paused() == false {
+                new_position.y += 2.0 + (get_difficulty() as f32 / 10.0);
             }
 
             self.set_position(new_position);
