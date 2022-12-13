@@ -1,4 +1,6 @@
 pub mod game {
+    use macroquad::{prelude::*, rand::gen_range};
+
     pub static mut DIFFICULTY: i32 = 1;
     pub static mut PAUSED: bool = false;
 
@@ -10,16 +12,14 @@ pub mod game {
     };
     pub const DEFAULT_PLAYER_Y: f32 = 360.0;
     pub const DEFAULT_PLAYER_HEALTH: i8 = 3;
-    pub const DEFAULT_PLAYER_SPEED: f32 = 5.0;
+    pub const DEFAULT_PLAYER_SPEED: f32 = 7.0;
 
     pub const DEFAULT_BALL_RADIUS: f32 = 30.0;
     pub const DEFAULT_BALL_Y: f32 = 80.0;
 
     pub const LEFT_MAP_BORDER: f32 = 70.0;
     pub const RIGHT_MAP_BORDER: f32 = 800.0 - 70.0;
-
-    use macroquad::prelude::*;
-
+    pub const GROUND_MAP_BORDER: f32 = 600.0;
     // #[derive(Clone, Copy)]
     pub struct Size {
         pub width: f32,
@@ -123,6 +123,7 @@ pub mod game {
         }
     }
 
+    #[derive(Clone, Copy)]
     pub enum BallTypes {
         Normal,
         Poisonous,
@@ -133,17 +134,55 @@ pub mod game {
         pub position: Vec2,
         pub radius: f32,
         pub ball_type: BallTypes,
-        pub index: usize,
+        pub color: Color,
     }
 
     impl Ball {
-        pub fn new(position: Vec2, ball_type: BallTypes, index: usize) -> Self {
+        pub fn new(position: Vec2, ball_type: BallTypes) -> Self {
             Self {
                 position,
                 radius: DEFAULT_BALL_RADIUS,
                 ball_type,
-                index,
+                color: Self::get_color_for_ball_type(&ball_type),
             }
+        }
+
+        pub fn gen_ball_position() -> Vec2 {
+            Vec2 {
+                x: gen_range(
+                    LEFT_MAP_BORDER + DEFAULT_BALL_RADIUS + 20.0,
+                    RIGHT_MAP_BORDER - DEFAULT_BALL_RADIUS - 20.0,
+                ),
+                y: DEFAULT_BALL_Y,
+            }
+        }
+
+        pub fn gen_ball_type() -> BallTypes {
+            let random_number = gen_range(0, 100);
+
+            if random_number >= 0 && random_number < 70 {
+                BallTypes::Normal
+            } else if random_number >= 70 && random_number < 87 {
+                BallTypes::Poisonous
+            } else {
+                BallTypes::Regeneration
+            }
+        }
+
+        pub fn get_color_for_ball_type(ball_type: &BallTypes) -> Color {
+            match ball_type {
+                BallTypes::Normal => BLACK,
+                BallTypes::Poisonous => RED,
+                BallTypes::Regeneration => GREEN,
+            }
+        }
+
+        pub fn reset(&mut self) -> &Self {
+            self.position = Self::gen_ball_position();
+            self.ball_type = Self::gen_ball_type();
+            self.color = Self::get_color_for_ball_type(&self.ball_type);
+
+            self
         }
 
         pub fn set_position(&mut self, new_position: Vec2) -> &Self {
@@ -152,12 +191,20 @@ pub mod game {
             self
         }
 
-        pub fn check_collision(&self, player: &Player) -> bool {
-            if (player.position.y < self.position.y + self.radius
-                && player.position.y + player.size.height > self.position.y - self.radius)
-                && (player.position.x < self.position.x
-                    && (player.position.x + player.size.width) > (self.position.x + self.radius))
+        pub fn check_collision_with_player(&self, player: &Player) -> bool {
+            if (player.position.y < (self.position.y + self.radius)
+                && (player.position.y + player.size.height) > (self.position.y - self.radius))
+                && (player.position.x < (self.position.x + self.radius)
+                    && (player.position.x + player.size.width) > (self.position.x - self.radius))
             {
+                true
+            } else {
+                false
+            }
+        }
+
+        pub fn check_collision_with_ground(&self) -> bool {
+            if (self.position.y + self.radius) > GROUND_MAP_BORDER {
                 true
             } else {
                 false
@@ -168,20 +215,14 @@ pub mod game {
             let Vec2 { x, y } = self.position;
             let radius = self.radius;
 
-            let color: Color = match self.ball_type {
-                BallTypes::Normal => BLACK,
-                BallTypes::Poisonous => RED,
-                BallTypes::Regeneration => GREEN,
-            };
-
-            draw_circle(x, y, radius, color)
+            draw_circle(x, y, radius, self.color)
         }
 
         pub fn on_frame(&mut self) {
             let mut new_position = self.position.clone();
 
             if unsafe { PAUSED } == false {
-                new_position.y += 3.0 * (unsafe { DIFFICULTY as f32 } / 2.0);
+                new_position.y += 2.0 + (unsafe { DIFFICULTY as f32 } / 10.0);
             }
 
             self.set_position(new_position);
