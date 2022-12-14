@@ -100,15 +100,11 @@ async fn main_loop(players: &mut Vec<Player>, balls: &mut Vec<Ball>) {
             };
             set_pause(&new_state);
             escape_pressed_last_time = true;
-            println!("paused: {}", new_state);
         } else {
             escape_pressed_last_time = false;
         }
         clear_background(BLACK);
         draw_rectangle(0.0, 0.0, 800.0, 600.0, WHITE);
-
-        // draw_rectangle(35.0, 35.0, 80.0, 80.0, RED);
-        // draw_circle(75.0, 75.0, 40.0, BLACK);
 
         if ((time::get_time() - 50.0 - pause_time + {
             let t = get_difficulty() / 130;
@@ -173,7 +169,6 @@ async fn main_loop(players: &mut Vec<Player>, balls: &mut Vec<Ball>) {
         }
 
         show_player_stats(&players);
-
         if is_paused() == true {
             draw_text("Paused", 20.0, 130.0, 55.0, ORANGE);
         };
